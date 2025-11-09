@@ -1,13 +1,13 @@
-package com.stepa7.demoproject;
+package com.stepa7.bank;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class DemoProjectApplication {
+public class BankApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(DemoProjectApplication.class, args);
+        SpringApplication.run(BankApplication.class, args);
     }
 
 }
