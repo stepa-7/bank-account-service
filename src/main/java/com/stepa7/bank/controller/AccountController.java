@@ -2,10 +2,9 @@ package com.stepa7.bank.controller;
 
 import com.stepa7.bank.model.dto.AccountDto;
 import com.stepa7.bank.model.entity.Account;
-import com.stepa7.bank.service.impl.AccountServiceImpl;
+import com.stepa7.bank.service.AccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +17,7 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/accounts")
 //@ConditionalOnProperty()
 public class AccountController {
-    private final AccountServiceImpl accountService;
+    private final AccountService accountService;
 
     @GetMapping
     public ResponseEntity<List<Account>> getAccounts() {
