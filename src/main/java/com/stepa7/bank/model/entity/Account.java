@@ -12,7 +12,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Getter
 @Setter
-@Table(name = "account")
+@Table(name = "accounts")
 public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,9 +24,9 @@ public class Account {
     @Column(nullable = false, length = 3)
     private String currency; // USD, EUR, RUB
 
-    @Column(name = "amount_currency", nullable = false, precision = 12, scale = 4)
+    @Column(name = "amount_currency", nullable = false, precision = 19, scale = 4)
     private BigDecimal amountCurrency;
 
-    @Column(name = "amount_rub", nullable = false, precision = 12, scale = 4)
+    @Column(name = "amount_rub", nullable = false, precision = 19, scale = 4)
     private BigDecimal amountRub;
 }

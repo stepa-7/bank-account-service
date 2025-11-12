@@ -1,8 +1,11 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/accountdb
-    username: postgres
-    password: postgres
+    url: ${DB_URL}
+#    url: jdbc:postgresql://localhost:5432/accountdb
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL}
+liquibase:
+  change-log: ${SPRING_LIQUIBASE_CHANGE_LOG}
