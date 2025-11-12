@@ -17,7 +17,7 @@ import java.util.UUID;
 @Table(name = "currency_rates")
 public class CurrencyRate {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private UUID id;
 
     @Column(nullable = false, length = 3)
