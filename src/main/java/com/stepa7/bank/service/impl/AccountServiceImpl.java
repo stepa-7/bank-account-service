@@ -4,6 +4,9 @@ import com.stepa7.bank.exception.NotFoundException;
 import com.stepa7.bank.model.dto.AccountDto;
 import com.stepa7.bank.model.entity.Account;
 import com.stepa7.bank.model.entity.CurrencyRate;
+import com.stepa7.bank.kafka.producer.KafkaProducerService;
+import com.stepa7.bank.kafka.dto.TransactionEvent;
+import java.time.LocalDateTime;
 import com.stepa7.bank.repository.AccountRepository;
 import com.stepa7.bank.repository.CurrencyRateRepository;
 import com.stepa7.bank.service.AccountService;
@@ -17,24 +20,24 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class AccountServiceImpl implements AccountService {
     private final AccountRepository accountRepository;
     private final CurrencyRateRepository rateRepository;
+    private final KafkaProducerService kafkaProducerService;
 
-    @Transactional(readOnly = true)
     @Override
     public List<Account> getAll() {
         return accountRepository.findAll();
     }
 
-    @Transactional(readOnly = true)
     @Override
     public Account getById(UUID id) {
         return accountRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Account not found"));
     }
 
-    @Transactional
+    @Transactional(readOnly = false)
     @Override
     public Account create(AccountDto dto) {
         validateAccountDto(dto);
@@ -50,10 +53,23 @@ public class AccountServiceImpl implements AccountService {
                 .amountRub(amountRub)
                 .build();
 
-        return accountRepository.save(account);
+        Account savedAccount = accountRepository.save(account);
+
+        TransactionEvent event = new TransactionEvent(
+                savedAccount.getId(),
+                "CREATE",
+                BigDecimal.ZERO,
+                savedAccount.getAmountCurrency(),
+                savedAccount.getCurrency(),
+                LocalDateTime.now(),
+                "Account created"
+        );
+        kafkaProducerService.sendTransactionEvent(event);
+
+        return savedAccount;
     }
 
-    @Transactional
+    @Transactional(readOnly = false)
     @Override
     public Account update(UUID id, AccountDto dto) {
         validateAccountDto(dto);
@@ -63,16 +79,41 @@ public class AccountServiceImpl implements AccountService {
         account.setCurrency(dto.getCurrency());
         account.setAmountCurrency(dto.getAmountCurrency());
         BigDecimal rate = getRateForCurrency(dto.getCurrency());
+        BigDecimal oldAmount = account.getAmountCurrency();
         account.setAmountRub(dto.getAmountCurrency().multiply(rate));
 
-        return accountRepository.save(account);
+        Account updatedAccount = accountRepository.save(account);
+
+        TransactionEvent event = new TransactionEvent(
+                updatedAccount.getId(),
+                "UPDATE",
+                oldAmount,
+                updatedAccount.getAmountCurrency(),
+                updatedAccount.getCurrency(),
+                LocalDateTime.now(),
+                "Account updated"
+        );
+        kafkaProducerService.sendTransactionEvent(event);
+
+        return updatedAccount;
     }
 
-    @Transactional
+    @Transactional(readOnly = false)
     @Override
     public void delete(UUID id) {
         Account account = getById(id);
         accountRepository.delete(account);
+
+        TransactionEvent event = new TransactionEvent(
+                account.getId(),
+                "DELETE",
+                account.getAmountCurrency(),
+                BigDecimal.ZERO,
+                account.getCurrency(),
+                LocalDateTime.now(),
+                "Account deleted"
+        );
+        kafkaProducerService.sendTransactionEvent(event);
     }
 
     @Override

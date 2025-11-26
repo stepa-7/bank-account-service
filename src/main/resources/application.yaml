@@ -9,3 +9,15 @@ spring:
       ddl-auto: ${SPRING_JPA_HIBERNATE_DDL}
 liquibase:
   change-log: ${SPRING_LIQUIBASE_CHANGE_LOG}
+kafka:
+  bootstrap-servers: localhost:9092
+  topic:
+    transaction-log: transaction-log
+  producer:
+    key-serializer: org.apache.kafka.common.serialization.StringSerializer
+    value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+  consumer:
+    group-id: bank-account-service-group
+    key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+    auto-offset-reset: earliest
